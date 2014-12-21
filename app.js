@@ -4,7 +4,6 @@ var options = {
   host: 'api.thescore.com',
   path: '/nhl/teams/15/events/full_schedule'
 };
-var gameToday = false;
 
 var req = http.get(options, function(res) {
   var bodyChunks = [];
@@ -61,7 +60,14 @@ function getSNData(id) {
 			var startTime = new Date(gameInfo.game.startTime);
 			// Get game's date
 			var startDate = startTime.getFullYear() + '-' + (startTime.getMonth() + 1) + '-' + startTime.getDate();
-			console.log(startDate);
+			var today = new Date();
+			var currentDate = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+			if (today == startDate) {
+				// Start checking by minute to see if game has started
+			}
+			else {
+				console.log('No game today bb');
+			}
 		})
 	});
 

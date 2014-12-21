@@ -18,7 +18,8 @@
   ],
   "author": "Anthony Barsotti",
   "dependencies": {
-    "underscore": "1.7.x"
+    "underscore": "1.7.x",
+    "node-hue-api": "0.2.x"
   },
   "license": "ISC",
   "bugs": {
