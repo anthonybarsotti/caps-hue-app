@@ -4,6 +4,7 @@ var options = {
   host: 'api.thescore.com',
   path: '/nhl/teams/15/events/full_schedule'
 };
+var gameToday = false;
 
 var req = http.get(options, function(res) {
   var bodyChunks = [];
@@ -12,11 +13,59 @@ var req = http.get(options, function(res) {
   }).on('end', function() {
     var body = Buffer.concat(bodyChunks);
     var fullSchedule = JSON.parse(body.toString());
+    // Get the next game in the Caps schedule
     var nextGame = _.findWhere(fullSchedule, {event_status: 'pre_game'});
-    console.log(nextGame.api_uri);
+    getNextGame(nextGame.api_uri);
   })
 });
 
 req.on('error', function(e) {
   console.log('ERROR: ' + e.message);
 });
+
+function getNextGame(uri) {
+	var options = {
+		host: 'api.thescore.com',
+		path: uri
+	};
+	var req = http.get(options, function(res) {
+		var bodyChunks = [];
+		res.on('data', function(chunk) {
+			bodyChunks.push(chunk);
+		}).on('end', function() {
+			var body = Buffer.concat(bodyChunks);
+			var game = JSON.parse(body.toString());
+			var url = game.sportsnet_tracker_url;
+			// Get ID of event on SportsNet
+			getSNData(url.substr(url.lastIndexOf('/') + 1));
+		})
+	});
+
+	req.on('error', function(e) {
+		console.log('ERROR: ' + e.message);
+	});
+}
+
+function getSNData(id) {
+	var options = {
+		host: 'api.onetwosee.com',
+		path: '/nhl/update/' + id + '/rogers?normalize=true'
+	};
+	var req = http.get(options, function(res) {
+		var bodyChunks = [];
+		res.on('data', function(chunk) {
+			bodyChunks.push(chunk);
+		}).on('end', function() {
+			var body = Buffer.concat(bodyChunks);
+			var gameInfo = JSON.parse(body.toString());
+			var startTime = new Date(gameInfo.game.startTime);
+			// Get game's date
+			var startDate = startTime.getFullYear() + '-' + (startTime.getMonth() + 1) + '-' + startTime.getDate();
+			console.log(startDate);
+		})
+	});
+
+	req.on('error', function(e) {
+		console.log('ERROR: ' + e.message);
+	});
+}
