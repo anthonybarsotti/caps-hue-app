@@ -1,26 +1,28 @@
 var http = require('http');
 var _ = require('underscore');
-var options = {
-  host: 'api.thescore.com',
-  path: '/nhl/teams/15/events/full_schedule'
-};
 
-var req = http.get(options, function(res) {
-  var bodyChunks = [];
-  res.on('data', function(chunk) {
-    bodyChunks.push(chunk);
-  }).on('end', function() {
-    var body = Buffer.concat(bodyChunks);
-    var fullSchedule = JSON.parse(body.toString());
-    // Get the next game in the Caps schedule
-    var nextGame = _.findWhere(fullSchedule, {event_status: 'pre_game'});
-    getNextGame(nextGame.api_uri);
-  })
-});
+exports.findGame = function() {
+	var options = {
+	  host: 'api.thescore.com',
+	  path: '/nhl/teams/15/events/full_schedule'
+	};
+	var req = http.get(options, function(res) {
+	  var bodyChunks = [];
+	  res.on('data', function(chunk) {
+	    bodyChunks.push(chunk);
+	  }).on('end', function() {
+	    var body = Buffer.concat(bodyChunks);
+	    var fullSchedule = JSON.parse(body.toString());
+	    // Get the next game in the Caps schedule
+	    var nextGame = _.findWhere(fullSchedule, {event_status: 'pre_game'});
+	    getNextGame(nextGame.api_uri);
+	  })
+	});
 
-req.on('error', function(e) {
-  console.log('ERROR: ' + e.message);
-});
+	req.on('error', function(e) {
+	  console.log('ERROR: ' + e.message);
+	});
+}
 
 function getNextGame(uri) {
 	var options = {
@@ -61,12 +63,12 @@ function getSNData(id) {
 			// Get game's date
 			var startDate = startTime.getFullYear() + '-' + (startTime.getMonth() + 1) + '-' + startTime.getDate();
 			var today = new Date();
-			var currentDate = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-			if (today == startDate) {
-				// Start checking by minute to see if game has started
+			var currentDate = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + (today.getDate());
+			if (currentDate == startDate) {
+				console.log('There\'s a game 2day bb');
 			}
 			else {
-				console.log('No game today bb');
+				console.log('No game 2day bb');
 			}
 		})
 	});
