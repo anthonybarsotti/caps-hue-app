@@ -10,18 +10,21 @@ var displayError = function(err) {
 	console.error(err);
 };
 
-//Add host and username
-var host = "XXX",
-username = "XXX",
-api = new HueApi(host, username),
-state1 = lightState.create();
-state2 = lightState.create();
+function triggerLights() {
+	var host = "XXX",
+	username = "XXX",
+	api = new HueApi(host, username),
+	state1 = lightState.create(),
+	state2 = lightState.create();
 
-api.setLightState(1, state1.alert(true).on())
-.then(displayResult)
-.fail(displayError)
-.done();
-api.setLightState(2, state2.alert(true).on())
-.then(displayResult)
-.fail(displayError)
-.done();
+	api.setLightState(1, state1.alert(true).on())
+	.then(displayResult)
+	.fail(displayError)
+	.done();
+	api.setLightState(2, state2.alert(true).on())
+	.then(displayResult)
+	.fail(displayError)
+	.done();
+}
+
+exports.triggerLights = triggerLights;

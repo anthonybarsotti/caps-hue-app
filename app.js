@@ -1,28 +1,27 @@
 var http = require('http');
 var _ = require('underscore');
+var timers = require('./timers.js');
 
-exports.findGame = function() {
-	var options = {
-	  host: 'api.thescore.com',
-	  path: '/nhl/teams/15/events/full_schedule'
-	};
-	var req = http.get(options, function(res) {
-	  var bodyChunks = [];
-	  res.on('data', function(chunk) {
-	    bodyChunks.push(chunk);
-	  }).on('end', function() {
-	    var body = Buffer.concat(bodyChunks);
-	    var fullSchedule = JSON.parse(body.toString());
+var options = {
+	host: 'api.thescore.com',
+	path: '/nhl/teams/15/events/full_schedule'
+};
+var req = http.get(options, function(res) {
+	var bodyChunks = [];
+	res.on('data', function(chunk) {
+		bodyChunks.push(chunk);
+	}).on('end', function() {
+		var body = Buffer.concat(bodyChunks);
+		var fullSchedule = JSON.parse(body.toString());
 	    // Get the next game in the Caps schedule
 	    var nextGame = _.findWhere(fullSchedule, {event_status: 'pre_game'});
 	    getNextGame(nextGame.api_uri);
-	  })
-	});
+	})
+});
 
-	req.on('error', function(e) {
-	  console.log('ERROR: ' + e.message);
-	});
-}
+req.on('error', function(e) {
+	console.log('ERROR: ' + e.message);
+});
 
 function getNextGame(uri) {
 	var options = {
@@ -65,7 +64,8 @@ function getSNData(id) {
 			var today = new Date();
 			var currentDate = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + (today.getDate());
 			if (currentDate == startDate) {
-				console.log('There\'s a game 2day bb');
+				// Initiate hour check to see if current hour matches game time's start hour
+				timers.hour(startTime.getHours(), startTime.getMinutes(), id);
 			}
 			else {
 				console.log('No game 2day bb');
