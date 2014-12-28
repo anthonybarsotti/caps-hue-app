@@ -1,26 +1,32 @@
+var http = require('http');
 var _ = require('underscore');
 var hue = require('./hue.js');
+var currentScore = 0;
 
 exports.hour = function(gameHour, gameMinute, gameID) {
 	function checkHour(h) {
 		var now = new Date();
-		if (h === now.getHours()) {
+		if (h <= now.getHours()) {
 			// Initiate minute check to see if current minute is 
-			checkMinute(gameMinute, gameID);
 			console.log('Almost there bb');
+			checkMinute(gameHour + ':' + gameMinute, gameID);
 		}
-		setTimeout(checkHour, 3600000);
+		else {
+			setTimeout(checkHour, 3600000);
+		}
 	}
 	checkHour(gameHour);
 }
 
 function checkMinute(m, id) {
 	var now = new Date();
-	if (m === now.getMinutes()) {
+	if (m <= now.getHours() + ':' + now.getMinutes()) {
 		checkScore(id);
 		console.log('Game time bb');
 	}
-	setTimeout(checkMinute, 60000);
+	else {
+		setTimeout(checkMinute, 60000);
+	}
 }
 
 function checkScore(id) {
@@ -35,9 +41,9 @@ function checkScore(id) {
 		}).on('end', function() {
 			var body = Buffer.concat(bodyChunks);
 			var gameInfo = JSON.parse(body.toString());
-			var gameStatus = new Date(gameInfo.game.status);
-			var capsScore = _.where(gameInfo.boxscores, {teamId: 15});
-			var currentScore = 0;
+			var gameStatus = gameInfo.game.status;
+			var capsScore = _.findWhere(gameInfo.boxscores, {teamId: 15});
+			var today = new Date();
 			if (gameStatus === 'post-event') {
 				console.log('Game is over bb');
 			}

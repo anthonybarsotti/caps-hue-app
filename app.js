@@ -2,26 +2,28 @@ var http = require('http');
 var _ = require('underscore');
 var timers = require('./timers.js');
 
-var options = {
-	host: 'api.thescore.com',
-	path: '/nhl/teams/15/events/full_schedule'
-};
-var req = http.get(options, function(res) {
-	var bodyChunks = [];
-	res.on('data', function(chunk) {
-		bodyChunks.push(chunk);
-	}).on('end', function() {
-		var body = Buffer.concat(bodyChunks);
-		var fullSchedule = JSON.parse(body.toString());
-	    // Get the next game in the Caps schedule
-	    var nextGame = _.findWhere(fullSchedule, {event_status: 'pre_game'});
-	    getNextGame(nextGame.api_uri);
-	})
-});
+function findGame() {
+	var options = {
+		host: 'api.thescore.com',
+		path: '/nhl/teams/15/events/full_schedule'
+	};
+	var req = http.get(options, function(res) {
+		var bodyChunks = [];
+		res.on('data', function(chunk) {
+			bodyChunks.push(chunk);
+		}).on('end', function() {
+			var body = Buffer.concat(bodyChunks);
+			var fullSchedule = JSON.parse(body.toString());
+		    // Get the next game in the Caps schedule
+		    var nextGame = _.findWhere(fullSchedule, {event_status: 'pre_game'});
+		    getNextGame(nextGame.api_uri);
+		})
+	});
 
-req.on('error', function(e) {
-	console.log('ERROR: ' + e.message);
-});
+	req.on('error', function(e) {
+		console.log('ERROR: ' + e.message);
+	});
+}
 
 function getNextGame(uri) {
 	var options = {
@@ -49,7 +51,7 @@ function getNextGame(uri) {
 function getSNData(id) {
 	var options = {
 		host: 'api.onetwosee.com',
-		path: '/nhl/update/' + id + '/rogers?normalize=true'
+		path: '/nhl/update/' + id +'/rogers?normalize=true'
 	};
 	var req = http.get(options, function(res) {
 		var bodyChunks = [];
@@ -64,7 +66,7 @@ function getSNData(id) {
 			var today = new Date();
 			var currentDate = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + (today.getDate());
 			if (currentDate == startDate) {
-				// Initiate hour check to see if current hour matches game time's start hour
+				// If game is today, initiate hour check to see if current hour matches game time's start hour
 				timers.hour(startTime.getHours(), startTime.getMinutes(), id);
 			}
 			else {
@@ -77,3 +79,5 @@ function getSNData(id) {
 		console.log('ERROR: ' + e.message);
 	});
 }
+
+exports.findGame = findGame;
